@@ -1,24 +1,19 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { isWhitelisted } from "@/lib/whitelist";
+import { headers } from "next/headers";
 import SignInScreen from "@/components/SignInScreen";
 import Homepage from "@/components/Homepage";
 
 export default async function Page() {
-  const session = await auth();
+  const requestHeaders = await headers();
+  const email = requestHeaders.get("x-user-email");
 
-  if (!session?.user) {
+  if (!email) {
     return <SignInScreen />;
-  }
-
-  if (!isWhitelisted(session.user.email)) {
-    redirect("https://classroom.google.com");
   }
 
   return (
     <Homepage
-      name={session.user.name ?? "You"}
-      image={session.user.image}
+      name={requestHeaders.get("x-user-name") || "You"}
+      image={requestHeaders.get("x-user-avatar")}
     />
   );
 }

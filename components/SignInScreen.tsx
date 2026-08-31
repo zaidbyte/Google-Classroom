@@ -1,7 +1,19 @@
-import { signIn } from "@/auth";
+"use client";
+
+import { createClient } from "@/lib/supabase/client";
 import { LogoMark, Wordmark } from "@/components/Logo";
 
 export default function SignInScreen() {
+  async function handleSignIn() {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#f8f9fa] px-4">
       <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-2xl border border-[#dadce0] bg-white px-8 py-10 shadow-sm">
@@ -17,21 +29,14 @@ export default function SignInScreen() {
           </p>
         </div>
 
-        <form
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: "/" });
-          }}
-          className="w-full"
+        <button
+          type="button"
+          onClick={handleSignIn}
+          className="flex w-full items-center justify-center gap-3 rounded-full border border-[#dadce0] bg-white px-6 py-2.5 text-sm font-medium text-[#3c4043] transition-colors hover:bg-[#f8f9fa] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a73e8]"
         >
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-full border border-[#dadce0] bg-white px-6 py-2.5 text-sm font-medium text-[#3c4043] transition-colors hover:bg-[#f8f9fa] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a73e8]"
-          >
-            <GoogleGlyph />
-            Sign in with Google
-          </button>
-        </form>
+          <GoogleGlyph />
+          Sign in with Google
+        </button>
       </div>
     </main>
   );

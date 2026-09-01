@@ -1,6 +1,11 @@
 import TopBar from "@/components/TopBar";
+import ClassTabs from "@/components/ClassTabs";
+import Sidebar from "@/components/Sidebar";
+import ClassBanner from "@/components/ClassBanner";
+import UpcomingCard from "@/components/UpcomingCard";
 import SearchBar from "@/components/SearchBar";
-import { LogoMark } from "@/components/Logo";
+
+const CLASS_NAME = "Language Arts 10A";
 
 export default function Homepage({
   name,
@@ -10,18 +15,25 @@ export default function Homepage({
   image: string | null | undefined;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <TopBar name={name} image={image} />
+    <div className="flex h-screen flex-col bg-white">
+      <TopBar name={name} image={image} breadcrumb={CLASS_NAME} />
+      <ClassTabs />
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
-        <div className="flex items-center gap-3">
-          <LogoMark size={56} />
-          <span className="text-4xl font-normal text-[#5f6368]">
-            Classroom
-          </span>
-        </div>
-        <SearchBar />
-      </main>
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+
+        <main className="flex-1 overflow-y-auto">
+          <ClassBanner title={CLASS_NAME} />
+
+          <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-[340px_1fr]">
+            <UpcomingCard />
+
+            <div className="flex min-h-[260px] items-center justify-center rounded-lg border border-[#dadce0] p-10">
+              <SearchBar />
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -4,22 +4,34 @@ import { LogoMark, Wordmark } from "@/components/Logo";
 export default function TopBar({
   name,
   image,
+  breadcrumb,
 }: {
   name: string;
   image: string | null | undefined;
+  breadcrumb?: string;
 }) {
   return (
-    <header className="flex h-16 items-center justify-between border-b border-[#e8eaed] bg-white px-4">
-      <div className="flex items-center gap-3">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#e8eaed] bg-white px-4">
+      <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
           aria-label="Menu"
-          className="rounded-full p-2 text-[#5f6368] hover:bg-[#f1f3f4]"
+          className="shrink-0 rounded-full p-2 text-[#5f6368] hover:bg-[#f1f3f4]"
         >
           <MenuIcon />
         </button>
-        <LogoMark size={32} />
-        <Wordmark />
+        <div className="shrink-0">
+          <LogoMark size={32} />
+        </div>
+        <div className="shrink-0">
+          <Wordmark />
+        </div>
+        {breadcrumb && (
+          <div className="flex min-w-0 items-center gap-3 text-[#5f6368]">
+            <ChevronIcon />
+            <span className="truncate text-[18px]">{breadcrumb}</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -57,6 +69,14 @@ function MenuIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="shrink-0">
+      <path d="m9 6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

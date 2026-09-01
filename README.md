@@ -15,12 +15,13 @@ deciding who reaches the actual homepage.
    - Calls `supabase.auth.getUser()` once (also refreshes the session
      cookie if the access token expired) — the only Supabase call in the
      whole request.
-   - If signed in, checks the email against `lib/whitelist.ts`: it must
-     end with `ALLOWED_EMAIL_DOMAIN` and its local part (before the `@`)
-     must start with one of `ALLOWED_ID_PREFIXES`. This is a pure string
-     check, not a database lookup, so it costs nothing and scales to any
-     number of matching accounts (e.g. every student in a given cohort)
-     without a table to maintain.
+   - If signed in, checks the email against `lib/whitelist.ts`: it's
+     allowed if it's in `EXTRA_ALLOWED_EMAILS` (individually named
+     exceptions), or if it ends with `ALLOWED_EMAIL_DOMAIN` and its local
+     part (before the `@`) starts with one of `ALLOWED_ID_PREFIXES`. This
+     is a pure string check, not a database lookup, so it costs nothing
+     and scales to any number of matching accounts (e.g. every student in
+     a given cohort) without a table to maintain.
    - **Matches** → the request continues to `app/page.tsx`, which renders
      the Classroom-themed homepage (`components/Homepage.tsx`) with the
      real Google profile picture and name (passed via request headers set

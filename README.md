@@ -1,8 +1,8 @@
 # Classroom-themed site
 
 A small Next.js app styled after Google Classroom's look, gated behind real
-Google sign-in (via Supabase Auth), with an email whitelist deciding who
-reaches the actual homepage.
+Google sign-in (via Supabase Auth), with a pattern-based rule on the email
+deciding who reaches the actual homepage.
 
 ## How it works
 
@@ -11,20 +11,23 @@ reaches the actual homepage.
    `supabase.auth.signInWithOAuth({ provider: "google" })`. No credentials
    are collected by this app — Google and Supabase handle the login.
 2. `app/auth/callback/route.ts` exchanges the OAuth code for a session.
-3. `middleware.ts` runs on every request to `/`:
+3. `proxy.ts` runs on every request to `/`:
    - Calls `supabase.auth.getUser()` once (also refreshes the session
-     cookie if the access token expired).
-   - If signed in, checks the `whitelist` table for that email — a
-     row-level-security policy restricts this to the caller's own row,
-     and the query uses `head: true` so no row data is transferred, just
-     a count.
-   - **Whitelisted** → the request continues to `app/page.tsx`, which
-     renders the Classroom-themed homepage (`components/Homepage.tsx`)
-     with the real Google profile picture and name (passed via request
-     headers set in middleware — no extra Supabase call in the page
-     itself) and a search bar.
-   - **Not whitelisted** → redirected to `https://classroom.google.com`
-     directly from middleware, before any page render.
+     cookie if the access token expired) — the only Supabase call in the
+     whole request.
+   - If signed in, checks the email against `lib/whitelist.ts`: it must
+     end with `ALLOWED_EMAIL_DOMAIN` and its local part (before the `@`)
+     must start with one of `ALLOWED_ID_PREFIXES`. This is a pure string
+     check, not a database lookup, so it costs nothing and scales to any
+     number of matching accounts (e.g. every student in a given cohort)
+     without a table to maintain.
+   - **Matches** → the request continues to `app/page.tsx`, which renders
+     the Classroom-themed homepage (`components/Homepage.tsx`) with the
+     real Google profile picture and name (passed via request headers set
+     in proxy — no extra Supabase call in the page itself) and a search
+     bar.
+   - **Doesn't match** → redirected to `https://classroom.google.com`
+     directly from proxy, before any page render.
 
 ## Setup
 
@@ -47,19 +50,7 @@ In the [Supabase dashboard](https://supabase.com/dashboard/project/tbumrkmjeglwd
 - Enable the provider.
 - Paste in the Client ID and Client Secret from step 1.
 
-### 3. Whitelist emails
-
-The `whitelist` table starts empty. Add emails allowed onto the homepage
-via the Supabase SQL editor:
-
-```sql
-insert into public.whitelist (email) values ('you@gmail.com');
-```
-
-Anyone who signs in but isn't in this table is redirected to
-`classroom.google.com` instead of seeing the homepage.
-
-### 4. Configure environment variables
+### 3. Configure environment variables
 
 Copy `.env.example` to `.env.local`:
 
@@ -70,8 +61,13 @@ cp .env.example .env.local
 - `NEXT_PUBLIC_SUPABASE_URL` — already filled in from this project.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the publishable/anon key from
   Supabase dashboard → Settings → API.
+- `ALLOWED_EMAIL_DOMAIN` / `ALLOWED_ID_PREFIXES` — who gets past the
+  gate. Defaults (`students.csdmi.org`, `2001,2002`) are baked into
+  `lib/whitelist.ts`, so these are only needed if that ever changes (e.g.
+  adding next year's cohort prefix) — no code change or redeploy of logic
+  needed, just update the env var.
 
-### 5. Run locally
+### 4. Run locally
 
 ```bash
 npm install

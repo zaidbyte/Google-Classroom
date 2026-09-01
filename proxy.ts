@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isWhitelisted } from "@/lib/whitelist";
 
 export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
@@ -40,14 +41,7 @@ export async function proxy(request: NextRequest) {
     return finish(NextResponse.next({ request: { headers: requestHeaders } }));
   }
 
-  // Row-level security scopes this to the caller's own row; head:true
-  // means only a count comes back, no row payload.
-  const { count } = await supabase
-    .from("whitelist")
-    .select("*", { count: "exact", head: true })
-    .eq("email", user.email);
-
-  if (!count) {
+  if (!isWhitelisted(user.email)) {
     return finish(NextResponse.redirect("https://classroom.google.com"));
   }
 

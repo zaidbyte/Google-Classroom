@@ -92,8 +92,3 @@ Visit `http://localhost:3000`.
 
 - The search bar currently just submits to `google.com/search` — it's a
   placeholder to expand later (e.g. a custom search backend).
-- `homepage.html` in the repo root is the raw Google Classroom page you
-  originally uploaded. It's kept for reference but isn't used by the app —
-  it's a live scrape of Google's own production bundle and contains a real
-  account's name, email, profile photo URL, and session tokens, so it
-  should not be deployed as-is.
